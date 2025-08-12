@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Atlantico Excursiones – Supplier API
-  version: 1.0.0
+  version: 1.0.3
   description: |
     Especificación **OpenAPI 3.0.3** basada en el manual "ATLANTICO EXCURSIONES API".
     Incluye endpoints de clasificaciones, tours, detalles de evento, precios,
@@ -10,8 +10,7 @@ info:
     **Acceso y seguridad**
     - El entorno **producción** requiere **lista blanca de IPs** (hasta 2) aprobadas por Atlantic Dolphin Travel.
     - Las peticiones y respuestas deben ser **UTF-8**.
-    - Cuando aplique, usar cabeceras `Accept: application/json` y
-      `Content-Type` apropiado.
+    - Usa cabeceras `Accept: application/json` y `Content-Type` apropiado.
 
   contact:
     name: Soporte API Atlantico Excursiones
@@ -22,9 +21,8 @@ servers:
   - url: https://testapi.atlanticoexcursiones.com
     description: Test / Sandbox
 
-externalDocs:
-  description: Manual original (PDF) – resumen incorporado en esta especificación
-  url: https://api.atlanticoexcursiones.com
+security:
+  - bearerAuth: []
 
 tags:
   - name: Classifications
@@ -48,6 +46,7 @@ paths:
     get:
       tags: [Classifications]
       summary: Listado de clasificaciones (ticket services)
+      operationId: getClassificationList
       description: |
         Devuelve la lista de clasificaciones disponibles.
         Idiomas soportados: **CAS**, **ENG**, **FRA**, **RUS**, **ALE**, **ITA**.
@@ -68,14 +67,17 @@ paths:
                     - id: '1312481776'
                       code: '20'
                       name: 'Coach Tours'
-                      desc: >-
-                        We organize tours in air-conditioned buses and accompanied by professional guides. Tours on the islands of Tenerife and La Gomera.
+                      desc: 'We organize tours in air-conditioned buses...'
                       image: '1312481776.jpg'
+        '400': { $ref: '#/components/responses/Error400' }
+        '401': { $ref: '#/components/responses/Error401' }
+
   /clasificationList/{language}/{collaborator}:
     get:
       tags: [Classifications]
       summary: Listado de clasificaciones (con colaborador)
-      description: Igual que el anterior, con **collaborator** opcional para precios/visibilidad específicos.
+      operationId: getClassificationListByCollaborator
+      description: Igual que el anterior, con **collaborator** para precios/visibilidad específicos.
       parameters:
         - $ref: '#/components/parameters/Language'
         - $ref: '#/components/parameters/Collaborator'
@@ -88,6 +90,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Classification'
+        '400': { $ref: '#/components/responses/Error400' }
+        '401': { $ref: '#/components/responses/Error401' }
 
   ########################################
   # 2) TOURS
@@ -96,6 +100,7 @@ paths:
     get:
       tags: [Tours]
       summary: Listado de tours
+      operationId: getTours
       description: |
         Devuelve tours por idioma y **paginación**.
         - `page = -1` devuelve **todos** los tours.
@@ -112,21 +117,14 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/TourSummary'
-              examples:
-                example:
-                  value:
-                    - id: '12'
-                      code: '12'
-                      name: 'Teide Masca (GRAN TOUR)'
-                      desc: 'El tour comienza haciendo las recogidas en los hoteles...'
-                      image: 'garachico-san-miguel1.jpg'
-                      price: '36.00'
-                      ids: ',184,546'
-                      duration: '9'
+        '400': { $ref: '#/components/responses/Error400' }
+        '401': { $ref: '#/components/responses/Error401' }
+
   /groupsList/{language}/{page}/{classificationCode}:
     get:
       tags: [Tours]
       summary: Listado de tours por clasificación
+      operationId: getToursByClassification
       description: Igual que el anterior, filtrando por **classificationCode** (ID de la clasificación).
       parameters:
         - $ref: '#/components/parameters/Language'
@@ -141,11 +139,14 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/TourSummary'
+        '400': { $ref: '#/components/responses/Error400' }
+        '401': { $ref: '#/components/responses/Error401' }
 
   /groupDetails/{code}/{language}:
     get:
       tags: [Tours]
       summary: Detalle de tour
+      operationId: getTourDetails
       parameters:
         - $ref: '#/components/parameters/Code'
         - $ref: '#/components/parameters/Language'
@@ -156,6 +157,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TourDetails'
+        '400': { $ref: '#/components/responses/Error400' }
+        '401': { $ref: '#/components/responses/Error401' }
 
   ########################################
   # 3) EVENTS (tour option)
@@ -164,6 +167,7 @@ paths:
     get:
       tags: [Events]
       summary: Detalle de opción (Event)
+      operationId: getEventDetails
       parameters:
         - $ref: '#/components/parameters/Code'
         - $ref: '#/components/parameters/Language'
@@ -184,9 +188,11 @@ paths:
                     times: ['08:15','08:20','08:20','-','08:20','08:20','-']
                     fak: ''
                     pProd: '0'
-                    route: 'https://www.google.com/maps/embed?pb=!1m72...'
+                    route: 'https://www.google.com/maps/embed?...'
                     desc: ''
                     icons: ['free_bus.png','history.png','interprete.png','paisaje.png','mirador.png']
+        '400': { $ref: '#/components/responses/Error400' }
+        '401': { $ref: '#/components/responses/Error401' }
 
   ########################################
   # 4) PRICES
@@ -195,6 +201,7 @@ paths:
     get:
       tags: [Prices]
       summary: Precios del Event (sin office)
+      operationId: getEventPrices
       description: |
         Devuelve precios y comisiones.
         Para precio **por persona** el formato es:
@@ -216,10 +223,14 @@ paths:
                 perDay:
                   summary: Precio por día (pares DAYS|PRICE|COMMISSION)
                   value: '3|36.00|19.00|7|110.80|35.70'
+        '400': { $ref: '#/components/responses/Error400' }
+        '401': { $ref: '#/components/responses/Error401' }
+
   /loadPrices/{code}/{date}/{office}:
     get:
       tags: [Prices]
       summary: Precios del Event (con office)
+      operationId: getEventPricesByOffice
       description: Igual que el anterior con `office` (collaborator) para tarifas especiales.
       parameters:
         - $ref: '#/components/parameters/Code'
@@ -232,6 +243,8 @@ paths:
             text/plain:
               schema:
                 type: string
+        '400': { $ref: '#/components/responses/Error400' }
+        '401': { $ref: '#/components/responses/Error401' }
 
   ########################################
   # 5) AVAILABILITY / LIMITS
@@ -240,6 +253,7 @@ paths:
     get:
       tags: [Availability]
       summary: Días disponibles / límites por Event (sin fecha)
+      operationId: getLoadLimits
       description: |
         Devuelve días bloqueados/disponibles, cupos y sesiones. `date` opcional en otra ruta.
       parameters:
@@ -252,10 +266,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/LoadLimitsResponse'
+        '400': { $ref: '#/components/responses/Error400' }
+        '401': { $ref: '#/components/responses/Error401' }
+
   /loadLimits/{code}/{language}/{date}:
     get:
       tags: [Availability]
       summary: Días disponibles / límites por Event (con fecha)
+      operationId: getLoadLimitsByMonth
       description: |
         `date` representa el primer día del mes (YYYY-MM-DD) para el que se consultan límites/sesiones.
       parameters:
@@ -297,17 +315,20 @@ paths:
                             sessionId: '39290'
                             rcId: '2'
                             TipoReservaId: '36'
+        '400': { $ref: '#/components/responses/Error400' }
+        '401': { $ref: '#/components/responses/Error401' }
 
   ########################################
   # 6) BOOKING
   ########################################
-  /confirm/:
+  /confirm:
     post:
       tags: [Booking]
       summary: Confirmación de reserva (sin pago o con redirect)
+      operationId: confirmBooking
       description: |
         Confirma la reserva enviando los parámetros requeridos y datos del cliente.
-        Alternativa de pago: usar `/payment/` para redirigir a la pasarela.
+        Alternativa de pago: usar `/payment` para redirigir a la pasarela.
       requestBody:
         required: true
         content:
@@ -324,10 +345,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ConfirmResponse'
-  /payment/:
+        '400': { $ref: '#/components/responses/Error400' }
+        '401': { $ref: '#/components/responses/Error401' }
+
+  /payment:
     post:
       tags: [Booking]
       summary: Redirección a pasarela de pago
+      operationId: createPayment
       requestBody:
         required: true
         content:
@@ -340,11 +365,14 @@ paths:
       responses:
         '302':
           description: Redirección a gateway de pago
+        '400': { $ref: '#/components/responses/Error400' }
+        '401': { $ref: '#/components/responses/Error401' }
 
   /cancelBooking/{bookingCode}:
     post:
       tags: [Booking]
       summary: Cancelación de reserva (sin nota)
+      operationId: cancelBooking
       parameters:
         - $ref: '#/components/parameters/BookingCode'
       responses:
@@ -355,10 +383,14 @@ paths:
               schema:
                 type: string
                 enum: ['0','1']
+        '400': { $ref: '#/components/responses/Error400' }
+        '401': { $ref: '#/components/responses/Error401' }
+
   /cancelBooking/{bookingCode}/{note}:
     post:
       tags: [Booking]
       summary: Cancelación de reserva (con nota)
+      operationId: cancelBookingWithNote
       parameters:
         - $ref: '#/components/parameters/BookingCode'
         - $ref: '#/components/parameters/Note'
@@ -370,8 +402,16 @@ paths:
               schema:
                 type: string
                 enum: ['0','1']
+        '400': { $ref: '#/components/responses/Error400' }
+        '401': { $ref: '#/components/responses/Error401' }
 
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
   parameters:
     Language:
       name: language
@@ -438,7 +478,52 @@ components:
         type: string
         description: Motivo/nota de cancelación
 
+  responses:
+    Error400:
+      description: Solicitud inválida
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            invalidRequest:
+              value:
+                code: invalid_request
+                message: 'Formato de parámetros inválido'
+    Error401:
+      description: No autorizado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            unauthorized:
+              value:
+                code: unauthorized
+                message: 'No autorizado o IP no permitida'
+    Error429:
+      description: Rate limit excedido
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            rateLimited:
+              value:
+                code: rate_limited
+                message: 'Demasiadas solicitudes'
+
   schemas:
+    Error:
+      type: object
+      properties:
+        code: { type: string }
+        message: { type: string }
+        details:
+          type: object
+          additionalProperties: true
+      required: [code, message]
+
     Classification:
       type: object
       properties:
