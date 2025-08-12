@@ -1,45 +1,596 @@
-Ok, vamos a dejarlo todo listo para que tu API se publique con un formato como el de Tiqets.
+openapi: 3.0.3
+info:
+  title: Atlantico Excursiones – Supplier API
+  version: 1.0.0
+  description: |
+    Especificación **OpenAPI 3.0.3** basada en el manual "ATLANTICO EXCURSIONES API".
+    Incluye endpoints de clasificaciones, tours, detalles de evento, precios,
+    límites/disponibilidad, confirmación/pago y cancelación.
 
-En el repositorio **supplier-api** tendrás:
+    **Acceso y seguridad**
+    - El entorno **producción** requiere **lista blanca de IPs** (hasta 2) aprobadas por Atlantic Dolphin Travel.
+    - Las peticiones y respuestas deben ser **UTF-8**.
+    - Cuando aplique, usar cabeceras `Accept: application/json` y
+      `Content-Type` apropiado.
 
-1. **openapi.yaml** – ya creado con la especificación completa.
-2. **docs/index.html** – archivo HTML que usa **ReDoc** para mostrar la documentación.
-3. **.github/workflows/deploy.yml** – workflow para desplegar automáticamente en GitHub Pages.
+  contact:
+    name: Soporte API Atlantico Excursiones
+    url: https://www.atlanticoexcursiones.com
+servers:
+  - url: https://api.atlanticoexcursiones.com
+    description: Producción
+  - url: https://testapi.atlanticoexcursiones.com
+    description: Test / Sandbox
 
-Ejemplo de **docs/index.html**:
-```html
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Atlantico Excursiones API</title>
-  <meta charset="utf-8" />
-  <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"></script>
-</head>
-<body>
-  <redoc spec-url="../openapi.yaml"></redoc>
-</body>
-</html>
-```
+externalDocs:
+  description: Manual original (PDF) – resumen incorporado en esta especificación
+  url: https://api.atlanticoexcursiones.com
 
-Ejemplo de **.github/workflows/deploy.yml**:
-```yaml
-name: Deploy API Docs
+tags:
+  - name: Classifications
+    description: Listados de clasificaciones de tours
+  - name: Tours
+    description: Búsqueda y detalles de tours
+  - name: Events
+    description: Detalles de opciones/variantes (Event)
+  - name: Prices
+    description: Precios y comisiones
+  - name: Availability
+    description: Límites, plazas y sesiones
+  - name: Booking
+    description: Confirmación, pago y cancelación de reservas
 
-on:
-  push:
-    branches:
-      - main
+paths:
+  ########################################
+  # 1) CLASSIFICATIONS
+  ########################################
+  /clasificationList/{language}:
+    get:
+      tags: [Classifications]
+      summary: Listado de clasificaciones (ticket services)
+      description: |
+        Devuelve la lista de clasificaciones disponibles.
+        Idiomas soportados: **CAS**, **ENG**, **FRA**, **RUS**, **ALE**, **ITA**.
+      parameters:
+        - $ref: '#/components/parameters/Language'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Classification'
+              examples:
+                example:
+                  value:
+                    - id: '1312481776'
+                      code: '20'
+                      name: 'Coach Tours'
+                      desc: >-
+                        We organize tours in air-conditioned buses and accompanied by professional guides. Tours on the islands of Tenerife and La Gomera.
+                      image: '1312481776.jpg'
+  /clasificationList/{language}/{collaborator}:
+    get:
+      tags: [Classifications]
+      summary: Listado de clasificaciones (con colaborador)
+      description: Igual que el anterior, con **collaborator** opcional para precios/visibilidad específicos.
+      parameters:
+        - $ref: '#/components/parameters/Language'
+        - $ref: '#/components/parameters/Collaborator'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Classification'
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs
-```
+  ########################################
+  # 2) TOURS
+  ########################################
+  /groupsList/{language}/{page}:
+    get:
+      tags: [Tours]
+      summary: Listado de tours
+      description: |
+        Devuelve tours por idioma y **paginación**.
+        - `page = -1` devuelve **todos** los tours.
+        - `page = 0` primeros 15, `page = 1` desde 15–30, etc.
+      parameters:
+        - $ref: '#/components/parameters/Language'
+        - $ref: '#/components/parameters/Page'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TourSummary'
+              examples:
+                example:
+                  value:
+                    - id: '12'
+                      code: '12'
+                      name: 'Teide Masca (GRAN TOUR)'
+                      desc: 'El tour comienza haciendo las recogidas en los hoteles...'
+                      image: 'garachico-san-miguel1.jpg'
+                      price: '36.00'
+                      ids: ',184,546'
+                      duration: '9'
+  /groupsList/{language}/{page}/{classificationCode}:
+    get:
+      tags: [Tours]
+      summary: Listado de tours por clasificación
+      description: Igual que el anterior, filtrando por **classificationCode** (ID de la clasificación).
+      parameters:
+        - $ref: '#/components/parameters/Language'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/ClassificationCode'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TourSummary'
 
-Cuando subas todo a **main** y actives **GitHub Pages** en la carpeta `docs/`, la documentación estará accesible públicamente como en el ejemplo de Tiqets.
+  /groupDetails/{code}/{language}:
+    get:
+      tags: [Tours]
+      summary: Detalle de tour
+      parameters:
+        - $ref: '#/components/parameters/Code'
+        - $ref: '#/components/parameters/Language'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TourDetails'
+
+  ########################################
+  # 3) EVENTS (tour option)
+  ########################################
+  /eventDetails/{code}/{language}:
+    get:
+      tags: [Events]
+      summary: Detalle de opción (Event)
+      parameters:
+        - $ref: '#/components/parameters/Code'
+        - $ref: '#/components/parameters/Language'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventDetails'
+              examples:
+                example:
+                  value:
+                    id: '569'
+                    code: '184'
+                    name: 'From The South Area'
+                    days: [1,2,3,0,5,6,0]
+                    times: ['08:15','08:20','08:20','-','08:20','08:20','-']
+                    fak: ''
+                    pProd: '0'
+                    route: 'https://www.google.com/maps/embed?pb=!1m72...'
+                    desc: ''
+                    icons: ['free_bus.png','history.png','interprete.png','paisaje.png','mirador.png']
+
+  ########################################
+  # 4) PRICES
+  ########################################
+  /loadPrices/{code}/{date}:
+    get:
+      tags: [Prices]
+      summary: Precios del Event (sin office)
+      description: |
+        Devuelve precios y comisiones.
+        Para precio **por persona** el formato es:
+        `ADULT|CHILD|INFANT|A_COMM|C_COMM|I_COMM`.
+      parameters:
+        - $ref: '#/components/parameters/Code'
+        - $ref: '#/components/parameters/Date'
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+              examples:
+                perPerson:
+                  summary: Precio por persona
+                  value: '36.00|19.00|0.00|10.80|5.70|0.00'
+                perDay:
+                  summary: Precio por día (pares DAYS|PRICE|COMMISSION)
+                  value: '3|36.00|19.00|7|110.80|35.70'
+  /loadPrices/{code}/{date}/{office}:
+    get:
+      tags: [Prices]
+      summary: Precios del Event (con office)
+      description: Igual que el anterior con `office` (collaborator) para tarifas especiales.
+      parameters:
+        - $ref: '#/components/parameters/Code'
+        - $ref: '#/components/parameters/Date'
+        - $ref: '#/components/parameters/Office'
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+
+  ########################################
+  # 5) AVAILABILITY / LIMITS
+  ########################################
+  /loadLimits/{code}/{language}:
+    get:
+      tags: [Availability]
+      summary: Días disponibles / límites por Event (sin fecha)
+      description: |
+        Devuelve días bloqueados/disponibles, cupos y sesiones. `date` opcional en otra ruta.
+      parameters:
+        - $ref: '#/components/parameters/Code'
+        - $ref: '#/components/parameters/Language'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoadLimitsResponse'
+  /loadLimits/{code}/{language}/{date}:
+    get:
+      tags: [Availability]
+      summary: Días disponibles / límites por Event (con fecha)
+      description: |
+        `date` representa el primer día del mes (YYYY-MM-DD) para el que se consultan límites/sesiones.
+      parameters:
+        - $ref: '#/components/parameters/Code'
+        - $ref: '#/components/parameters/Language'
+        - $ref: '#/components/parameters/Date'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoadLimitsResponse'
+              examples:
+                example:
+                  value:
+                    id: '184'
+                    code: 0
+                    quote: '160'
+                    dates:
+                      limit: [0,60,0,160,0,160,160,0]
+                      date: ['20180606','20180608','20180609','20180611','20180612','20180613','20180615','20180616','20180618']
+                      used: [51,30,11,4,0,2,0,0]
+                      wdays: [0,2,3,4,0,6,0]
+                      sessions:
+                        '20220801':
+                          - time: '09:30'
+                            available: '6235'
+                            precio: '28.0000'
+                            bruto: '26.1682224273682'
+                            sessionId: '39289'
+                            rcId: '2'
+                            TipoReservaId: '36'
+                        '20220802':
+                          - time: '09:30'
+                            available: '8199'
+                            precio: '28.0000'
+                            bruto: '26.1682224273682'
+                            sessionId: '39290'
+                            rcId: '2'
+                            TipoReservaId: '36'
+
+  ########################################
+  # 6) BOOKING
+  ########################################
+  /confirm/:
+    post:
+      tags: [Booking]
+      summary: Confirmación de reserva (sin pago o con redirect)
+      description: |
+        Confirma la reserva enviando los parámetros requeridos y datos del cliente.
+        Alternativa de pago: usar `/payment/` para redirigir a la pasarela.
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ConfirmRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmRequest'
+      responses:
+        '200':
+          description: OK – devuelve referencia de la reserva
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfirmResponse'
+  /payment/:
+    post:
+      tags: [Booking]
+      summary: Redirección a pasarela de pago
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ConfirmRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmRequest'
+      responses:
+        '302':
+          description: Redirección a gateway de pago
+
+  /cancelBooking/{bookingCode}:
+    post:
+      tags: [Booking]
+      summary: Cancelación de reserva (sin nota)
+      parameters:
+        - $ref: '#/components/parameters/BookingCode'
+      responses:
+        '200':
+          description: 0 si éxito, 1 si fallo
+          content:
+            text/plain:
+              schema:
+                type: string
+                enum: ['0','1']
+  /cancelBooking/{bookingCode}/{note}:
+    post:
+      tags: [Booking]
+      summary: Cancelación de reserva (con nota)
+      parameters:
+        - $ref: '#/components/parameters/BookingCode'
+        - $ref: '#/components/parameters/Note'
+      responses:
+        '200':
+          description: 0 si éxito, 1 si fallo
+          content:
+            text/plain:
+              schema:
+                type: string
+                enum: ['0','1']
+
+components:
+  parameters:
+    Language:
+      name: language
+      in: path
+      required: true
+      schema:
+        type: string
+        enum: [CAS, ENG, FRA, RUS, ALE, ITA]
+    Collaborator:
+      name: collaborator
+      in: path
+      required: true
+      schema:
+        type: string
+        description: Collaborator number
+    Page:
+      name: page
+      in: path
+      required: true
+      schema:
+        type: integer
+        description: -1 devuelve todos los tours; 0 primeros 15; 1 desde 15–30; etc.
+    ClassificationCode:
+      name: classificationCode
+      in: path
+      required: true
+      schema:
+        type: string
+        description: Id de la clasificación
+    Code:
+      name: code
+      in: path
+      required: true
+      schema:
+        type: string
+        description: Id del Tour/Event según corresponda
+    Date:
+      name: date
+      in: path
+      required: true
+      schema:
+        type: string
+        format: date
+        example: '2025-08-08'
+    Office:
+      name: office
+      in: path
+      required: true
+      schema:
+        type: string
+        description: Collaborator number para tarifas especiales
+    BookingCode:
+      name: bookingCode
+      in: path
+      required: true
+      schema:
+        type: string
+        description: Referencia de la reserva
+    Note:
+      name: note
+      in: path
+      required: true
+      schema:
+        type: string
+        description: Motivo/nota de cancelación
+
+  schemas:
+    Classification:
+      type: object
+      properties:
+        id: { type: string, example: '1312481776' }
+        code: { type: string, example: '20' }
+        name: { type: string, example: 'Coach Tours' }
+        desc: { type: string }
+        image: { type: string, example: '1312481776.jpg' }
+      required: [id, code, name]
+
+    TourSummary:
+      type: object
+      properties:
+        id: { type: string, example: '12' }
+        code: { type: string, example: '12' }
+        name: { type: string, example: 'Teide Masca (GRAN TOUR)' }
+        desc: { type: string }
+        image: { type: string, example: 'garachico-san-miguel1.jpg' }
+        price: { type: string, example: '36.00' }
+        ids: { type: string, example: ',184,546' }
+        duration: { type: string, example: '9' }
+      required: [id, code, name]
+
+    TourDetails:
+      type: object
+      properties:
+        id: { type: string, example: '497' }
+        code: { type: string, example: '12' }
+        name: { type: string, example: 'Teide Masca (Grand Tour)' }
+        category: { type: string, example: '1312481776' }
+        faq: { type: string }
+        desc: { type: string }
+        image: { type: string, example: 'garachico-san-miguel1.jpg' }
+        price: { type: string, example: '36.00' }
+        ids: { type: string, example: ',184,546' }
+        video: { type: string, example: 'https://www.youtube.com/embed/WYN1TMy0Z_c' }
+        childAge: { type: string, example: '2 - 11' }
+        infantAge: { type: string, example: '0 - 1' }
+        duration: { type: string, example: '9' }
+        ghygo: { type: string, example: '' }
+      required: [id, code, name]
+
+    EventDetails:
+      type: object
+      properties:
+        id: { type: string, example: '569' }
+        code: { type: string, example: '184' }
+        name: { type: string, example: 'From The South Area' }
+        days:
+          type: array
+          items: { type: integer }
+          example: [1,2,3,0,5,6,0]
+        times:
+          type: array
+          items: { type: string }
+          example: ['08:15','08:20','08:20','-','08:20','08:20','-']
+        fak: { type: string, example: '' }
+        pProd:
+          type: string
+          description: Tipo de precio (0 per person, 1 per product, 2 per day, 3 unique)
+          enum: ['0','1','2','3']
+          example: '0'
+        route: { type: string, example: 'https://www.google.com/maps/embed?...' }
+        desc: { type: string }
+        icons:
+          type: array
+          items: { type: string }
+          example: ['free_bus.png','history.png','interprete.png','paisaje.png','mirador.png']
+
+    LoadLimitsResponse:
+      type: object
+      properties:
+        id: { type: string, example: '184' }
+        code: { type: integer, example: 0 }
+        quote: { type: string, example: '160' }
+        dates:
+          type: object
+          properties:
+            limit:
+              type: array
+              items: { type: integer }
+              example: [0,60,0,160,0,160,160,0]
+            date:
+              type: array
+              items: { type: string }
+              example: ['20180606','20180608','20180609','20180611','20180612','20180613','20180615','20180616','20180618']
+            used:
+              type: array
+              items: { type: integer }
+              example: [51,30,11,4,0,2,0,0]
+            wdays:
+              type: array
+              items: { type: integer }
+              description: Días de la semana disponibles (0 = no disponible)
+              example: [0,2,3,4,0,6,0]
+            sessions:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SessionItem'
+              description: Mapa YYYYMMDD -> lista de sesiones disponibles
+      required: [id, dates]
+
+    SessionItem:
+      type: object
+      properties:
+        time: { type: string, example: '09:30' }
+        available: { type: string, example: '6235' }
+        precio: { type: string, example: '28.0000' }
+        bruto: { type: string, example: '26.1682224273682' }
+        sessionId: { type: string, example: '39289' }
+        rcId: { type: string, example: '2' }
+        TipoReservaId: { type: string, example: '36' }
+
+    ConfirmRequest:
+      type: object
+      properties:
+        userId: { type: string }
+        t_id:   { type: string, description: 'Id del Event (a veces llamado tId)' }
+        t_group: { type: string, description: 'Id del Tour' }
+        language: { type: string, enum: [CAS, ENG, FRA, RUS, ALE, ITA] }
+        tourDate: { type: string, format: date, example: '2025-08-08' }
+        sesTime: { type: string, description: 'Hora de sesión; si no hay, usar 00:00', example: '09:30' }
+        adults: { type: integer }
+        childs: { type: integer }
+        infants: { type: integer }
+        name: { type: string }
+        email: { type: string, format: email }
+        phone: { type: string }
+        hotel: { type: string, description: 'Código de hotel (opcional, importante para pickup)' }
+        room: { type: string }
+        mpoint: { type: string, description: 'Meeting point code (opcional)' }
+        mtime: { type: string, description: 'Meeting time (opcional)' }
+        Notes: { type: string, description: 'Nota del cliente (opcional)' }
+      required:
+        - userId
+        - t_id
+        - t_group
+        - language
+        - tourDate
+        - sesTime
+        - adults
+        - childs
+        - infants
+        - name
+        - email
+        - phone
+
+    ConfirmResponse:
+      type: object
+      properties:
+        bookingCode: { type: string, description: 'Referencia de la reserva' }
+        message: { type: string }
+      required: [bookingCode]
