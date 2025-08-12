@@ -1,0 +1,45 @@
+Ok, vamos a dejarlo todo listo para que tu API se publique con un formato como el de Tiqets.
+
+En el repositorio **supplier-api** tendrás:
+
+1. **openapi.yaml** – ya creado con la especificación completa.
+2. **docs/index.html** – archivo HTML que usa **ReDoc** para mostrar la documentación.
+3. **.github/workflows/deploy.yml** – workflow para desplegar automáticamente en GitHub Pages.
+
+Ejemplo de **docs/index.html**:
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Atlantico Excursiones API</title>
+  <meta charset="utf-8" />
+  <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"></script>
+</head>
+<body>
+  <redoc spec-url="../openapi.yaml"></redoc>
+</body>
+</html>
+```
+
+Ejemplo de **.github/workflows/deploy.yml**:
+```yaml
+name: Deploy API Docs
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+```
+
+Cuando subas todo a **main** y actives **GitHub Pages** en la carpeta `docs/`, la documentación estará accesible públicamente como en el ejemplo de Tiqets.
