@@ -1,11 +1,30 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="es">
 <head>
-  <title>Atlantico Excursiones API</title>
   <meta charset="utf-8" />
-  <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"></script>
+  <title>Atlántico Excursiones API – Swagger UI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Swagger UI (CDN) -->
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist/swagger-ui.css" />
 </head>
 <body>
-  <redoc spec-url="openapi.yaml"></redoc>
+  <div id="swagger-ui"></div>
+
+  <script src="https://unpkg.com/swagger-ui-dist/swagger-ui-bundle.js"></script>
+  <script>
+    // IMPORTANTÍSIMO: usar ruta relativa, sin barra inicial,
+    // para que funcione en GitHub Pages bajo /supplier-api/
+    const SPEC_URL = 'openapi.yaml';
+
+    window.onload = () => {
+      window.ui = SwaggerUIBundle({
+        url: SPEC_URL,
+        dom_id: '#swagger-ui',
+        deepLinking: true,
+        presets: [SwaggerUIBundle.presets.apis],
+        layout: "BaseLayout"
+      });
+    };
+  </script>
 </body>
 </html>
