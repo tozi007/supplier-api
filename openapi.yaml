@@ -23,8 +23,8 @@ security:
   - bearerAuth: []
 
 tags:
-  - name: Categorías
-    description: Listados de las categorías disponibles
+  - name: Classifications
+    description: Listados de clasificaciones de tours
   - name: Tours
     description: Búsqueda y detalles de tours
   - name: Events
@@ -42,17 +42,17 @@ paths:
   ########################################
   /clasificationList/{language}:
     get:
-      tags: [Categorías]
+      tags: [Classifications]
       summary: Listado de clasificaciones (ticket services)
       operationId: getClassificationList
       description: |
-        Devuelve la lista de categorías disponibles.
-        Idiomas soportados: **CAS** (Español), **ENG** (Ingles), **FRA** (Françes), **RUS** (Ruso), **ALE** (Aleman), **ITA** (Italiano).
+        Devuelve la lista de clasificaciones disponibles.
+        Idiomas soportados: **CAS**, **ENG**, **FRA**, **RUS**, **ALE**, **ITA**.
       parameters:
         - $ref: '#/components/parameters/Language'
       responses:
         '200':
-          description: Devuelve un listado con las categorías por idioma que incluye el identificador, nombre, descripción, imagen y código de clasificación.
+          description: OK
           content:
             application/json:
               schema:
@@ -72,7 +72,7 @@ paths:
 
   /clasificationList/{language}/{collaborator}:
     get:
-      tags: [Categorías]
+      tags: [Classifications]
       summary: Listado de clasificaciones (con colaborador)
       operationId: getClassificationListByCollaborator
       description: Igual que el anterior, con **collaborator** para precios/visibilidad específicos.
@@ -81,7 +81,7 @@ paths:
         - $ref: '#/components/parameters/Collaborator'
       responses:
         '200':
-          description: Devuelve un listado con las categorías individuales de cada colaborador por idioma que incluye el identificador, nombre, descripción, imagen y código de clasificación.
+          description: OK
           content:
             application/json:
               schema:
@@ -97,12 +97,11 @@ paths:
   /groupsList/{language}/{page}:
     get:
       tags: [Tours]
-      summary: Listado de actividades
+      summary: Listado de tours
       operationId: getTours
-      description: Listado de actividades que incluye el identificador de clasificación, nombre,
-descripción, imagen, precio, duración y código de la actividad
-        Devuelve un listado de todas las actividades por idioma y **paginación**.
-        - `page = -1` devuelve **todas** las actividades.
+      description: |
+        Devuelve tours por idioma y **paginación**.
+        - `page = -1` devuelve **todos** los tours.
         - `page = 0` primeros 15, `page = 1` desde 15–30, etc.
       parameters:
         - $ref: '#/components/parameters/Language'
