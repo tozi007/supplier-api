@@ -16,8 +16,6 @@ info:
     name: Soporte API Atlantico Excursiones
     url: https://www.atlanticoexcursiones.com
 servers:
-  - url: https://api.atlanticoexcursiones.com
-    description: Producción
   - url: https://testapi.atlanticoexcursiones.com
     description: Test / Sandbox
 
@@ -25,8 +23,8 @@ security:
   - bearerAuth: []
 
 tags:
-  - name: Classifications
-    description: Listados de clasificaciones de tours
+  - name: Categorías
+    description: Listados de las categorías disponibles
   - name: Tours
     description: Búsqueda y detalles de tours
   - name: Events
@@ -44,17 +42,17 @@ paths:
   ########################################
   /clasificationList/{language}:
     get:
-      tags: [Classifications]
+      tags: [Categorías]
       summary: Listado de clasificaciones (ticket services)
       operationId: getClassificationList
       description: |
-        Devuelve la lista de clasificaciones disponibles.
-        Idiomas soportados: **CAS**, **ENG**, **FRA**, **RUS**, **ALE**, **ITA**.
+        Devuelve la lista de categorías disponibles.
+        Idiomas soportados: **CAS** (Español), **ENG** (Ingles), **FRA** (Françes), **RUS** (Ruso), **ALE** (Aleman), **ITA** (Italiano).
       parameters:
         - $ref: '#/components/parameters/Language'
       responses:
         '200':
-          description: OK
+          description: Devuelve un listado con las categorías por idioma que incluye el identificador, nombre, descripción, imagen y código de clasificación.
           content:
             application/json:
               schema:
@@ -74,7 +72,7 @@ paths:
 
   /clasificationList/{language}/{collaborator}:
     get:
-      tags: [Classifications]
+      tags: [Categorías]
       summary: Listado de clasificaciones (con colaborador)
       operationId: getClassificationListByCollaborator
       description: Igual que el anterior, con **collaborator** para precios/visibilidad específicos.
@@ -83,7 +81,7 @@ paths:
         - $ref: '#/components/parameters/Collaborator'
       responses:
         '200':
-          description: OK
+          description: Devuelve un listado con las categorías individuales de cada colaborador por idioma que incluye el identificador, nombre, descripción, imagen y código de clasificación.
           content:
             application/json:
               schema:
@@ -99,11 +97,12 @@ paths:
   /groupsList/{language}/{page}:
     get:
       tags: [Tours]
-      summary: Listado de tours
+      summary: Listado de actividades
       operationId: getTours
-      description: |
-        Devuelve tours por idioma y **paginación**.
-        - `page = -1` devuelve **todos** los tours.
+      description: Listado de actividades que incluye el identificador de clasificación, nombre,
+descripción, imagen, precio, duración y código de la actividad
+        Devuelve un listado de todas las actividades por idioma y **paginación**.
+        - `page = -1` devuelve **todas** las actividades.
         - `page = 0` primeros 15, `page = 1` desde 15–30, etc.
       parameters:
         - $ref: '#/components/parameters/Language'
