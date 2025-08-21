@@ -43,16 +43,16 @@ paths:
   /clasificationList/{language}:
     get:
       tags: [Classifications]
-      summary: Listado de clasificaciones (ticket services)
+      summary: Listado de categoías (ticket services)
       operationId: getClassificationList
       description: |
-        Devuelve la lista de clasificaciones disponibles.
+        Devuelve la lista de categoías disponibles.
         Idiomas soportados: **CAS**, **ENG**, **FRA**, **RUS**, **ALE**, **ITA**.
       parameters:
         - $ref: '#/components/parameters/Language'
       responses:
         '200':
-          description: OK
+          description: La respuesta incluye la clasificación. identificador, nombre, descripción, imagen y código de clasificación.
           content:
             application/json:
               schema:
@@ -73,15 +73,15 @@ paths:
   /clasificationList/{language}/{collaborator}:
     get:
       tags: [Classifications]
-      summary: Listado de clasificaciones (con colaborador)
+      summary: Listado de categoías (con colaborador)
       operationId: getClassificationListByCollaborator
-      description: Igual que el anterior, con **collaborator** para precios/visibilidad específicos.
+      description: Igual que el anterior, con **collaborator** para categoías/visibilidad específicos.
       parameters:
         - $ref: '#/components/parameters/Language'
         - $ref: '#/components/parameters/Collaborator'
       responses:
         '200':
-          description: OK
+          description:  La respuesta incluye la clasificación. identificador, nombre, descripción, imagen y código de clasificación.
           content:
             application/json:
               schema:
