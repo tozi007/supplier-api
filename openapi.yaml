@@ -24,9 +24,9 @@ security:
 
 tags:
   - name: Classifications
-    description: Listados de clasificaciones de tours
+    description: Listados de las categorías de actividades
   - name: Tours
-    description: Búsqueda y detalles de tours
+    description: Búsqueda y detalles de las actividades
   - name: Events
     description: Detalles de opciones/variantes (Event)
   - name: Prices
@@ -121,7 +121,7 @@ paths:
   /groupsList/{language}/{page}/{classificationCode}:
     get:
       tags: [Tours]
-      summary: Listado de tours por clasificación
+      summary: Listado de actividades por categoría
       operationId: getToursByClassification
       description: Igual que el anterior, filtrando por **classificationCode** (ID de la clasificación).
       parameters:
