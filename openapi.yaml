@@ -43,10 +43,10 @@ paths:
   /clasificationList/{language}:
     get:
       tags: [Classifications]
-      summary: Listado de categoías (ticket services)
+      summary: Listado de categorías (ticket services)
       operationId: getClassificationList
       description: |
-        Devuelve la lista de categoías disponibles.
+        Devuelve la lista de categorías disponibles.
         Idiomas soportados: **CAS**, **ENG**, **FRA**, **RUS**, **ALE**, **ITA**.
       parameters:
         - $ref: '#/components/parameters/Language'
@@ -73,9 +73,9 @@ paths:
   /clasificationList/{language}/{collaborator}:
     get:
       tags: [Classifications]
-      summary: Listado de categoías (con colaborador)
+      summary: Listado de categorías (con colaborador)
       operationId: getClassificationListByCollaborator
-      description: Igual que el anterior, con **collaborator** para categoías/visibilidad específicos.
+      description: Igual que el anterior, con **collaborator** para categorías/visibilidad específicos.
       parameters:
         - $ref: '#/components/parameters/Language'
         - $ref: '#/components/parameters/Collaborator'
@@ -97,10 +97,10 @@ paths:
   /groupsList/{language}/{page}:
     get:
       tags: [Tours]
-      summary: Listado de tours
+      summary: Listado de actividades
       operationId: getTours
       description: |
-        Devuelve tours por idioma y **paginación**.
+        Devuelve actividades por idioma y **paginación**.
         - `page = -1` devuelve **todos** los tours.
         - `page = 0` primeros 15, `page = 1` desde 15–30, etc.
       parameters:
@@ -130,7 +130,7 @@ paths:
         - $ref: '#/components/parameters/ClassificationCode'
       responses:
         '200':
-          description: OK
+          description: La respuesta incluye el identificador de clasificación, nombre, descripción, imagen, precio, duración y código de la actividad.
           content:
             application/json:
               schema:
@@ -143,7 +143,7 @@ paths:
   /groupDetails/{code}/{language}:
     get:
       tags: [Tours]
-      summary: Detalle de tour
+      summary: Detalles de la actividad
       operationId: getTourDetails
       parameters:
         - $ref: '#/components/parameters/Code'
